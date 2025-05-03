@@ -1,3 +1,4 @@
+from textnode import TextType
 
 # An HTMLNode without a tag will just render as raw text
 # An HTMLNode without a value will be assumed to have children
@@ -53,3 +54,20 @@ class ParentNode(HTMLNode):
             result += child.to_html()
         
         return f"<{self.tag}{self.props_to_html()}>{result}</{self.tag}>"
+    
+def text_node_to_html_node(node):
+    match node.text_type:
+        case TextType.TEXT:
+            return LeafNode(None, node.text)
+        case TextType.BOLD:
+            return LeafNode("b", node.text)
+        case TextType.ITALIC:
+            return LeafNode("i", node.text)
+        case TextType.CODE:
+            return LeafNode("code", node.text)
+        case TextType.LINK:
+            return LeafNode("a", node.text, {'href': f"{node.url}"})
+        case TextType.IMAGE:
+            return LeafNode("img", "", { 'src': f"{node.url}", 'alt': f"{node.text}" })
+        case _:
+            raise Exception("node type not recognized")

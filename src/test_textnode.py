@@ -10,17 +10,17 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(node, node2)
 
     def test_eq_false(self):
-        node = TextNode("This is a text node", TextType.NORMAL)
+        node = TextNode("This is a text node", TextType.TEXT)
         node2 = TextNode("This is a text node", TextType.BOLD)
         self.assertNotEqual(node, node2)
 
     def test_eq_false2(self):
-        node = TextNode("This is a text node", TextType.NORMAL)
-        node2 = TextNode("This is a text node2", TextType.NORMAL)
+        node = TextNode("This is a text node", TextType.TEXT)
+        node2 = TextNode("This is a text node2", TextType.TEXT)
         self.assertNotEqual(node, node2)
 
     def test_eq_type_false(self):
-        node = TextNode("This is a text node", TextType.NORMAL)
+        node = TextNode("This is a text node", TextType.TEXT)
         node2 = "This is a string"
         self.assertNotEqual(node, node2)
 
@@ -40,14 +40,14 @@ class TestTextNode(unittest.TestCase):
         self.assertNotEqual(node, node2)
 
     def test_repr(self):
-        node = TextNode("This is a text node", TextType.NORMAL, "https://www.boot.dev")
+        node = TextNode("This is a text node", TextType.TEXT, "https://www.boot.dev")
         self.assertEqual(
-            "TextNode(This is a text node, normal, https://www.boot.dev)", repr(node)
+            "TextNode(This is a text node, text, https://www.boot.dev)", repr(node)
         )
 
     def test_ol_eq(self):
-        node = TextNode("This is a text node", TextType.NORMAL)
-        node2 = TextNode("This is a text node", TextType.NORMAL)
+        node = TextNode("This is a text node", TextType.TEXT)
+        node2 = TextNode("This is a text node", TextType.TEXT)
         self.assertTrue(node == node2)
 
     
