@@ -1,12 +1,15 @@
 from enum import Enum
 
+from textnode import TextNode, TextType
+from htmlnode import LeafNode, ParentNode, text_node_to_html_node
+
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
     HEADING = "heading"
     CODE = "code"
     QUOTE = "quote"
-    U_LIST = "unordered list"
-    O_LIST = "ordered list"
+    U_LIST = "unordered_list"
+    O_LIST = "ordered_list"
 
 
 
@@ -66,3 +69,18 @@ def block_to_block_type(block):
     
     # else 
     return BlockType.PARAGRAPH
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+
+    div = ParentNode("div", [])
+
+    for block in blocks:
+        match block_to_block_type(block):
+            case BlockType.CODE:
+                text = block[3:-3].lstrip()
+                div.children.append(ParentNode("pre", [text_node_to_html_node(TextNode(text, TextType.CODE))]))
+            case _:
+                raise Exception("Block not recognized")
+
+    return div

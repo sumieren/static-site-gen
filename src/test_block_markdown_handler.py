@@ -1,6 +1,6 @@
 import unittest
 
-from block_markdown_handler import markdown_to_blocks, block_to_block_type, BlockType
+from block_markdown_handler import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
 
 class TestBlockHandler(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -128,6 +128,22 @@ class TestBlockHandler(unittest.TestCase):
         blocks = ["1. this list is \n3. incorrectly ordered", "1. this one\n is missing numbering"]
         for block in blocks:
             self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    # test markdown to html block
+    def test_codeblock(self):
+        md = """
+            ```
+            This is text that _should_ remain
+            the **same** even with inline stuff
+            ```
+            """
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
 
 if __name__ == "__main__":
     unittest.main()
