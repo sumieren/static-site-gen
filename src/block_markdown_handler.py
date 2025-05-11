@@ -2,6 +2,7 @@ from enum import Enum
 
 from textnode import TextNode, TextType
 from htmlnode import LeafNode, ParentNode, text_node_to_html_node
+from inline_markdown_handler import text_to_textnodes
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -75,12 +76,59 @@ def markdown_to_html_node(markdown):
 
     div = ParentNode("div", [])
 
+
+
     for block in blocks:
         match block_to_block_type(block):
+            case BlockType.HEADING:
+                headers = ["#", "##", "###", "####", "#####", "######"]
+                if any(block.startswith(header) for header in headers):
+                    split = block.split(" ", 1)
+                    value = len(split[0])
+
+                    div.children.append(ParentNode(f"h{value}", text_to_children(split[1])))
             case BlockType.CODE:
                 text = block[3:-3].lstrip()
                 div.children.append(ParentNode("pre", [text_node_to_html_node(TextNode(text, TextType.CODE))]))
+            case BlockType.QUOTE:
+                lines = block.split("\n")
+                clean_string = ""
+                for line in lines:
+                    # take out the >
+                    split = line.split(" ", 1)
+                    
+                    clean_string += split[1] + "\n"
+
+                # take off the last newline
+                clean_string = clean_string.strip()
+                div.children.append(ParentNode("blockquote", text_to_children(clean_string)))
+            case BlockType.U_LIST:
+                div.children.append(ParentNode("ul", create_list_leaves(block)))
+            case BlockType.O_LIST:
+                div.children.append(ParentNode("ol", create_list_leaves(block)))
+            case BlockType.PARAGRAPH:
+                clean_text = block.replace("\n", " ")
+                div.children.append(ParentNode("p", text_to_children(clean_text)))
             case _:
                 raise Exception("Block not recognized")
 
     return div
+
+def text_to_children(text):
+    result = []
+
+    text_nodes = text_to_textnodes(text)
+    for node in text_nodes:
+        result.append(text_node_to_html_node(node))
+
+    return result
+
+def create_list_leaves(text):
+    leaves = []
+    items = text.split("\n")
+
+    for item in items:
+        split = item.split(" ", 1)
+        leaves.append(LeafNode("li", split[1]))
+
+    return leaves
