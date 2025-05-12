@@ -94,10 +94,8 @@ def markdown_to_html_node(markdown):
                 lines = block.split("\n")
                 clean_string = ""
                 for line in lines:
-                    # take out the >
-                    split = line.split(" ", 1)
-                    
-                    clean_string += split[1] + "\n"
+                    # take out the >             
+                    clean_string += line.replace(">", "").strip() + "\n"
 
                 # take off the last newline
                 clean_string = clean_string.strip()
@@ -129,6 +127,14 @@ def create_list_leaves(text):
 
     for item in items:
         split = item.split(" ", 1)
-        leaves.append(LeafNode("li", split[1]))
+        children = text_to_children(split[1])
+        leaves.append(ParentNode("li", children))
 
     return leaves
+
+def extract_title(markdown):
+    split = markdown.split("\n")
+    for line in split:
+        if line.strip().startswith("# "):
+            return line.replace("#", "").strip()
+    raise Exception("no header found in markdown")

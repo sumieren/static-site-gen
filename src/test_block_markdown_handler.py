@@ -1,6 +1,6 @@
 import unittest
 
-from block_markdown_handler import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
+from block_markdown_handler import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node, extract_title
 
 class TestBlockHandler(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -216,6 +216,44 @@ class TestBlockHandler(unittest.TestCase):
             html,
             "<div><ol><li>This is a list</li><li>it is ordered</li><li>this is the third</li><li>now the list is done</li></ol></div>",
         )
+
+    def test_title(self):
+        md = """
+            # Title here
+
+            This is the body.
+
+            """
+        title = extract_title(md)
+        self.assertEqual(title, "Title here")
+
+    def test_title_wrong(self):
+        md = """
+            ### No title here
+
+            ## This isn't a title
+
+            #Neither is this
+
+            This is the body.
+
+            """
+        with self.assertRaises(Exception):
+            title = extract_title(md)
+
+    def test_title_order(self):
+        md = """
+            Text first
+
+            ### Then some other stuff
+
+            ## Or this kind of stuff
+
+            # But this is the title
+
+            """
+        title = extract_title(md)
+        self.assertEqual(title, "But this is the title")
 
 if __name__ == "__main__":
     unittest.main()
