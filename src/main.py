@@ -7,7 +7,7 @@ from shutil import copy
 
 dir_path_static = "./static"
 dir_path_public = "./public"
-
+dir_path_content = "./content"
 template_path = "./template.html"
 
 def main(): 
@@ -19,11 +19,11 @@ def main():
     # copy all static files to equivalent locations in public
     static_to_public(dir_path_static, dir_path_public)
 
-    # generate a page
-    generate_page("./content/index.md", template_path, "./public/index.html")
+    # generate pages
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
 
 def static_to_public(source, destination):          
-    # check if the destination has this director already
+    # check if the destination has this directory already
     if not exists(destination):
         print(f"{destination} not found, creating..")
         mkdir(destination)
@@ -58,8 +58,26 @@ def generate_page(from_path, template_path, dest_path):
     
     # check if the destination path exists else make it
     if not exists(dirname(dest_path)):
-        makedirs(dest_path)
+        makedirs(dirname(dest_path))
 
     with open(dest_path, "w") as file:
         print(page, file=file)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    # check if the destination has this directory already
+    if not exists(dest_dir_path):
+        print(f"{dest_dir_path} not found, creating..")
+        mkdir(dest_dir_path)
+
+    # iterate over every file in the dir to see if its a file or a dir. Copy the file, recurse the dir
+    for file in listdir(dir_path_content):
+        source_path = join(dir_path_content, file)
+        destination_path = join(dest_dir_path, file)
+
+        if isfile(source_path):
+            destination_path = destination_path.replace(".md", ".html")
+            generate_page(source_path, template_path, destination_path)
+        else:
+            print(f"Directory found. Searching for files in {file} at {source_path}")
+            generate_pages_recursive(source_path, template_path, destination_path)
 main()
