@@ -1,16 +1,20 @@
 from textnode import TextNode, TextType
 from block_markdown_handler import markdown_to_html_node, extract_title
-from shutil import rmtree
+from shutil import rmtree, copy
 from os.path import exists, join, dirname, isfile
 from os import listdir, mkdir, makedirs
-from shutil import copy
+from sys import argv
 
 dir_path_static = "./static"
-dir_path_public = "./public"
+dir_path_public = "./docs"
 dir_path_content = "./content"
 template_path = "./template.html"
 
 def main(): 
+    # get the basepath from argv
+    if len(argv) > 1:
+        base_path = argv[1]
+
     # if this is the root call, delete the public dir
     if exists(dir_path_public):
         print("public dir found, deleting")
@@ -20,7 +24,7 @@ def main():
     static_to_public(dir_path_static, dir_path_public)
 
     # generate pages
-    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public, base_path)
 
 def static_to_public(source, destination):          
     # check if the destination has this directory already
@@ -41,7 +45,7 @@ def static_to_public(source, destination):
             static_to_public(source_file_path, destination_file_path)
             
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     markdown = ""
     template = ""
@@ -54,7 +58,9 @@ def generate_page(from_path, template_path, dest_path):
     html = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
 
+    # first add the content, then add the basepath
     page = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    page = page.replace('href="/', 'href="{basepath}').replace('src="/', 'src="{basepath}')
     
     # check if the destination path exists else make it
     if not exists(dirname(dest_path)):
@@ -63,7 +69,7 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, "w") as file:
         print(page, file=file)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, base_path):
     # check if the destination has this directory already
     if not exists(dest_dir_path):
         print(f"{dest_dir_path} not found, creating..")
@@ -76,8 +82,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
         if isfile(source_path):
             destination_path = destination_path.replace(".md", ".html")
-            generate_page(source_path, template_path, destination_path)
+            generate_page(source_path, template_path, destination_path, base_path)
         else:
             print(f"Directory found. Searching for files in {file} at {source_path}")
-            generate_pages_recursive(source_path, template_path, destination_path)
+            generate_pages_recursive(source_path, template_path, destination_path, base_path)
 main()
