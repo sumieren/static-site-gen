@@ -60,7 +60,7 @@ def generate_page(from_path, template_path, dest_path, base_path):
 
     # first add the content, then add the basepath
     page = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
-    page = page.replace('href="/', 'href="{basepath}').replace('src="/', 'src="{basepath}')
+    page = page.replace('href="/', f'href="{base_path}').replace('src="/', f'src="{base_path}')
     
     # check if the destination path exists else make it
     if not exists(dirname(dest_path)):
